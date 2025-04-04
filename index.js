@@ -66,4 +66,8 @@ pool.query(`
     if (err) console.error('❌ SQL помилка:', err);
     else console.log('✅ Таблиця створена або вже існує');
   });
+
+  app.get("/", (req, res) => {
+    res.send("✅ Сервер працює. Доступні маршрути: /api/form");
+  });
   
