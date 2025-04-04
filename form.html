@@ -3,40 +3,68 @@
 <head>
   <meta charset="UTF-8">
   <title>Опитування</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: auto;
+      padding: 2rem;
+    }
+    input, textarea, button {
+      width: 100%;
+      margin-top: 0.5rem;
+      margin-bottom: 1.5rem;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+  </style>
 </head>
 <body>
   <h1>Місячне опитування</h1>
   <form id="surveyForm">
-    <label>Discord ID:</label><br>
-    <input type="text" name="discord_id" required><br><br>
+    <label>Discord ID:</label>
+    <input type="text" name="discord_id" required>
 
-    <label>Ім’я:</label><br>
-    <input type="text" name="name" required><br><br>
+    <label>Ім’я:</label>
+    <input type="text" name="name" required>
 
-    <label>Роль (студент або ментор):</label><br>
-    <input type="text" name="role" required><br><br>
+    <label>Роль (студент або ментор):</label>
+    <input type="text" name="role" required>
 
-    <label>Зворотній зв’язок:</label><br>
-    <textarea name="feedback" rows="4" cols="50"></textarea><br><br>
+    <label>Зворотній зв’язок:</label>
+    <textarea name="feedback" rows="4"></textarea>
 
     <button type="submit">Надіслати</button>
   </form>
 
+  <p id="responseMessage" style="font-weight: bold;"></p>
+
   <script>
-    document.getElementById('surveyForm').addEventListener('submit', async (e) => {
+    const form = document.getElementById('surveyForm');
+    const responseMsg = document.getElementById('responseMessage');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const form = new FormData(e.target);
-      const data = Object.fromEntries(form.entries());
 
-      const res = await fetch("https://skillclan-production.up.railway.app/api/form", {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(data)
-      });
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
 
-      const msg = await res.text();
-      alert(msg);
-      e.target.reset();
+      try {
+        const res = await fetch("https://skillclan-production.up.railway.app/api/form", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const text = await res.text();
+        responseMsg.textContent = `✅ ${text}`;
+        responseMsg.style.color = 'green';
+        form.reset();
+      } catch (err) {
+        responseMsg.textContent = '❌ Помилка при надсиланні форми';
+        responseMsg.style.color = 'red';
+        console.error(err);
+      }
     });
   </script>
 </body>
