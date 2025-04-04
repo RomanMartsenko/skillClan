@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Опитування</title>
+</head>
+<body>
+  <h1>Місячне опитування</h1>
+  <form id="surveyForm">
+    <label>Discord ID:</label><br>
+    <input type="text" name="discord_id" required><br><br>
+
+    <label>Ім’я:</label><br>
+    <input type="text" name="name" required><br><br>
+
+    <label>Роль (студент або ментор):</label><br>
+    <input type="text" name="role" required><br><br>
+
+    <label>Зворотній зв’язок:</label><br>
+    <textarea name="feedback" rows="4" cols="50"></textarea><br><br>
+
+    <button type="submit">Надіслати</button>
+  </form>
+
+  <script>
+    document.getElementById('surveyForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = new FormData(e.target);
+      const data = Object.fromEntries(form.entries());
+
+      const res = await fetch('http://localhost:3000/api/form', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+
+      const msg = await res.text();
+      alert(msg);
+      e.target.reset();
+    });
+  </script>
+</body>
+</html>
