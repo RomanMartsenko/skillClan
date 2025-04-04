@@ -28,7 +28,7 @@
       const form = new FormData(e.target);
       const data = Object.fromEntries(form.entries());
 
-      const res = await fetch('http://localhost:3000/api/form', {
+      const res = await fetch("https://skillclan-production.up.railway.app/api/form", {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data)
