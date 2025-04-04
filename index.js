@@ -23,7 +23,7 @@ const pool = new Pool({
 
 // 🔁 GET /
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'form.html'));
+  res.sendFile(path.join(__dirname, 'form.html'));
 });
 
 // 📩 POST /api/form
