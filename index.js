@@ -23,11 +23,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Налаштування підключення до PostgreSQL з використанням config.js
 const pool = new Pool({
-  host: process.env.PGHOST,      // викликаємо PGHOST зі змінної середовища
-  port: process.env.PGPORT || 5432, // додаємо fallback на порт 5432, якщо PGPORT не визначений
-  database: process.env.PGDATABASE,
-  user: process.env.PGUSER,
-  password: process.env.PGPASSWORD,
+  host: process.env.PGHOST,  // Беремо значення з .env
+  port: process.env.PGPORT,  // Беремо порт з .env
+  database: process.env.PGDATABASE, // Беремо ім'я бази даних
+  user: process.env.PGUSER,  // Беремо ім'я користувача
+  password: process.env.PGPASSWORD,  // Беремо пароль
 });
 
 // 🔁 GET /
