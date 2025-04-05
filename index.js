@@ -1,11 +1,19 @@
-require('dotenv').config(); // дозволяє читати .env
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const { Pool } = require('pg');
+import 'dotenv/config'; // дозволяє читати .env
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url'; // Імпортуємо функцію для конвертації URL в шлях
+import pkg from 'pg';  // Імпортуємо pg як default експорт
+const { Pool } = pkg; // Тепер використовуємо Pool з дефолтного експорту
+
+import config from './config.js';  // Імпортуємо конфігураційний файл
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = config.server.port;
+
+// Для отримання __dirname в ES модулях
+const __filename = fileURLToPath(import.meta.url); 
+const __dirname = path.dirname(__filename);  // Отримуємо шлях до поточної директорії
 
 app.use(cors());
 app.use(express.json()); // парсить JSON
@@ -13,17 +21,18 @@ app.use(express.json()); // парсить JSON
 // Статичні файли (щоб видавати form.html)
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Налаштування підключення до PostgreSQL з використанням config.js
 const pool = new Pool({
-  host: process.env.PGHOST,
-  port: process.env.PGPORT,
-  database: process.env.PGDATABASE,
-  user: process.env.PGUSER,
-  password: process.env.PGPASSWORD,
+  host: config.database.host,
+  port: config.database.port,
+  database: config.database.database,
+  user: config.database.user,
+  password: config.database.password,
 });
 
 // 🔁 GET /
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, 'form.html'));
+  res.sendFile(path.join(__dirname, 'public', 'form.html'));
 });
 
 // 📩 POST /api/form
@@ -69,7 +78,7 @@ pool.query(`
     updated_at TIMESTAMP DEFAULT now()
   );
 `, (err, res) => {
-  if (err) console.error('❌ SQL помилка:', err);
+  if (err) console.error('❌ SQL помилка при створенні таблиці:', err);
   else console.log('✅ Таблиця створена або вже існує');
 });
 
