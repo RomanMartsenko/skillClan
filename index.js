@@ -3,23 +3,31 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import pkg from 'pg';
+import pg from 'pg';
 import config from './config.js';
 
-const { Pool } = pkg;
+const { Pool } = pg;
+
 const app = express();
 const port = config.server.port;
 
+// __dirname в ES модулях
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const pool = new Pool(config.database);
+// Підключення до PostgreSQL через DATABASE_URL
+const pool = new Pool({
+  connectionString: config.databaseUrl,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
 
-app.get('/', (req, res) => {
+// Routes
+app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'form.html'));
 });
 
@@ -36,10 +44,7 @@ app.post('/api/form', async (req, res) => {
       if (feedback !== existing.rows[0].feedback) updates.push(['feedback', feedback]);
 
       for (const [field, value] of updates) {
-        await pool.query(
-          `UPDATE users SET ${field} = $1, updated_at = now() WHERE discord_id = $2`,
-          [value, discord_id]
-        );
+        await pool.query(`UPDATE users SET ${field} = $1, updated_at = now() WHERE discord_id = $2`, [value, discord_id]);
       }
 
       return res.send('Оновлено');
@@ -56,6 +61,7 @@ app.post('/api/form', async (req, res) => {
   }
 });
 
+// Таблиця
 pool.query(`
   CREATE TABLE IF NOT EXISTS users (
     discord_id TEXT PRIMARY KEY,
@@ -69,6 +75,7 @@ pool.query(`
   else console.log('✅ Таблиця створена або вже існує');
 });
 
+// Запуск сервера
 app.listen(port, () => {
   console.log(`Сервер працює на http://localhost:${port}`);
 });
