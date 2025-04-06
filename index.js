@@ -22,8 +22,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Підключення до PostgreSQL через DATABASE_URL
 const pool = new Pool({
-  connectionString: config.databaseUrl,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 });
 
 // Routes
