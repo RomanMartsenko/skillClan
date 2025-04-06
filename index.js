@@ -2,32 +2,32 @@ import 'dotenv/config'; // дозволяє читати .env
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
-import { fileURLToPath } from 'url'; // Імпортуємо функцію для конвертації URL в шлях
-import pkg from 'pg';  // Імпортуємо pg як default експорт
-const { Pool } = pkg; // Тепер використовуємо Pool з дефолтного експорту
+import { fileURLToPath } from 'url';
+import pkg from 'pg';
+const { Pool } = pkg;
 
-import config from './config.js';  // Імпортуємо конфігураційний файл
+import config from './config.js';  // Підключення до .env через config.js
 
 const app = express();
 const port = config.server.port;
 
 // Для отримання __dirname в ES модулях
-const __filename = fileURLToPath(import.meta.url); 
-const __dirname = path.dirname(__filename);  // Отримуємо шлях до поточної директорії
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.use(cors());
-app.use(express.json()); // парсить JSON
+app.use(express.json());
 
-// Статичні файли (щоб видавати form.html)
+// Статичні файли
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Налаштування підключення до PostgreSQL з використанням config.js
+// Підключення до бази PostgreSQL
 const pool = new Pool({
-  host: process.env.DATABASE_PUBLIC_URL,  // Беремо значення з .env
-  port: process.env.PGPORT,  // Беремо порт з .env
-  database: process.env.PGDATABASE, // Беремо ім'я бази даних
-  user: process.env.PGUSER,  // Беремо ім'я користувача
-  password: process.env.PGPASSWORD,  // Беремо пароль
+  host: config.database.host,
+  port: config.database.port,
+  database: config.database.database,
+  user: config.database.user,
+  password: config.database.password,
 });
 
 // 🔁 GET /
@@ -43,20 +43,21 @@ app.post('/api/form', async (req, res) => {
     const existing = await pool.query('SELECT * FROM users WHERE discord_id = $1', [discord_id]);
 
     if (existing.rows.length > 0) {
-      // Оновлення тільки змінених полів
       const updates = [];
       if (name !== existing.rows[0].name) updates.push(['name', name]);
       if (role !== existing.rows[0].role) updates.push(['role', role]);
       if (feedback !== existing.rows[0].feedback) updates.push(['feedback', feedback]);
 
       for (const [field, value] of updates) {
-        await pool.query(`UPDATE users SET ${field} = $1, updated_at = now() WHERE discord_id = $2`, [value, discord_id]);
+        await pool.query(
+          `UPDATE users SET ${field} = $1, updated_at = now() WHERE discord_id = $2`,
+          [value, discord_id]
+        );
       }
 
       return res.send('Оновлено');
     }
 
-    // Новий запис
     await pool.query(
       'INSERT INTO users (discord_id, name, role, feedback) VALUES ($1, $2, $3, $4)',
       [discord_id, name, role, feedback]
@@ -68,7 +69,7 @@ app.post('/api/form', async (req, res) => {
   }
 });
 
-// 🛠️ Створення таблиці при запуску (тільки раз)
+// 🛠️ Створення таблиці
 pool.query(`
   CREATE TABLE IF NOT EXISTS users (
     discord_id TEXT PRIMARY KEY,
@@ -82,7 +83,7 @@ pool.query(`
   else console.log('✅ Таблиця створена або вже існує');
 });
 
-// 🚀 Запуск
+// 🚀 Запуск сервера
 app.listen(port, () => {
   console.log(`Сервер працює на http://localhost:${port}`);
 });
