@@ -1,41 +1,28 @@
-import 'dotenv/config'; // дозволяє читати .env
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import pkg from 'pg';
+import config from './config.js';
+
 const { Pool } = pkg;
-
-import config from './config.js';  // Підключення до .env через config.js
-
 const app = express();
 const port = config.server.port;
 
-// Для отримання __dirname в ES модулях
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use(cors());
 app.use(express.json());
-
-// Статичні файли
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Підключення до бази PostgreSQL
-const pool = new Pool({
-  host: config.database.host,
-  port: config.database.port,
-  database: config.database.database,
-  user: config.database.user,
-  password: config.database.password,
-});
+const pool = new Pool(config.database);
 
-// 🔁 GET /
-app.get("/", (req, res) => {
+app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'form.html'));
 });
 
-// 📩 POST /api/form
 app.post('/api/form', async (req, res) => {
   const { discord_id, name, role, feedback } = req.body;
 
@@ -69,7 +56,6 @@ app.post('/api/form', async (req, res) => {
   }
 });
 
-// 🛠️ Створення таблиці
 pool.query(`
   CREATE TABLE IF NOT EXISTS users (
     discord_id TEXT PRIMARY KEY,
@@ -78,12 +64,11 @@ pool.query(`
     feedback TEXT,
     updated_at TIMESTAMP DEFAULT now()
   );
-`, (err, res) => {
+`, (err) => {
   if (err) console.error('❌ SQL помилка при створенні таблиці:', err);
   else console.log('✅ Таблиця створена або вже існує');
 });
 
-// 🚀 Запуск сервера
 app.listen(port, () => {
   console.log(`Сервер працює на http://localhost:${port}`);
 });
