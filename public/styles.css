@@ -7,6 +7,9 @@ body {
   }
   
   form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
     background-color: #ffffff;
     border-radius: 16px;
     padding: 30px;
@@ -31,14 +34,15 @@ body {
   
   input,
   select {
+    appearance: none;
     width: 100%;
-    padding: 12px;
-    margin-bottom: 20px;
+    padding: 12px 16px;
     border: 1px solid #ccc;
     border-radius: 8px;
     font-size: 16px;
     background-color: #f9f9f9;
     transition: border-color 0.2s ease;
+    box-sizing: border-box;
   }
   
   input:focus,
@@ -51,6 +55,17 @@ body {
   .invalid {
     border-color: #ff4d4d !important;
     background-color: #fff0f0;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .input-group label {
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #333;
   }
   
   button {
@@ -71,4 +86,27 @@ body {
   
   #newNameBlock {
     margin-bottom: 20px;
-  }  
+  }
+
+  input[type="date"] {
+    position: relative;
+    padding-left: 42px;
+    background: #f9f9f9 url("data:image/svg+xml,%3Csvg fill='gray' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 10h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z'/%3E%3Cpath d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM5 7V6h14v1H5z'/%3E%3C/svg%3E") no-repeat 12px center;
+    background-size: 20px 20px;
+    color: #333;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+       -moz-appearance: none;
+            appearance: none;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+  }

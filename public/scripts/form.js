@@ -140,3 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     submitBtn.textContent = "Надіслати";
   });
 });
+
+document.querySelectorAll('input[type="date"]').forEach(input => {
+  input.addEventListener('click', () => input.showPicker?.());
+});
