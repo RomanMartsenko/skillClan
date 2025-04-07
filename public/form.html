@@ -1,41 +1,56 @@
-<!-- public/form.html -->
 <!DOCTYPE html>
 <html lang="uk">
+
 <head>
   <meta charset="UTF-8" />
-  <title>Форма відправки</title>
+  <title>Форма студента</title>
 </head>
+
 <body>
-  <h2>Додати запис</h2>
-  <form id="dataForm">
-    <label for="id">ID:</label>
-    <input type="number" id="id" name="id" required><br><br>
-    
-    <label for="name">Ім'я:</label>
-    <input type="text" id="name" name="name" required><br><br>
-    
+  <h2>Форма реєстрації студента</h2>
+
+  <form id="studentForm">
+    <label for="existingName">Ім’я студента:</label>
+    <select id="existingName" name="existingName">
+      <option value="">-- новий студент --</option>
+      <!-- Імена студентів можна додати динамічно -->
+    </select><br><br>
+
+    <div id="newNameBlock">
+      <label for="name">Введіть нове ім’я:</label>
+      <input type="text" id="name" name="name" required /><br><br>
+    </div>
+
+    <label for="mentor">Ментор:</label>
+    <select id="mentor" name="mentor"></select><br><br>
+
+    <label for="birth_date">Дата народження:</label>
+    <input type="date" id="birth_date" name="birth_date"><br><br>
+
+    <label for="phone">Телефон:</label>
+    <input type="tel" id="phone" name="phone"><br><br>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email"><br><br>
+
+    <label for="start_date">Дата початку навчання:</label>
+    <input type="date" id="start_date" name="start_date"><br><br>
+
+    <label for="offer_date">Дата оферу:</label>
+    <input type="date" id="offer_date" name="offer_date"><br><br>
+
+    <label for="status">Статус:</label>
+    <select id="status" name="status" required>
+      <option value="навчання">Навчання</option>
+      <option value="співбесіди">Співбесіди</option>
+      <option value="офер">Офер</option>
+    </select><br><br>
+
+
     <button type="submit">Надіслати</button>
   </form>
 
-  <script>
-    document.getElementById('dataForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const id = document.getElementById('id').value;
-      const name = document.getElementById('name').value;
-
-      const res = await fetch('/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, name })
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        alert('Успішно надіслано!');
-      } else {
-        alert('Помилка: ' + data.error);
-      }
-    });
-  </script>
+  <script src="form.js"></script>
 </body>
+
 </html>
