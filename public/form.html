@@ -1,44 +1,40 @@
+<!-- public/form.html -->
 <!DOCTYPE html>
 <html lang="uk">
 <head>
   <meta charset="UTF-8" />
-  <title>Опитування</title>
+  <title>Форма відправки</title>
 </head>
 <body>
-  <h1>Місячне опитування</h1>
-  <form id="surveyForm">
-    <label>Discord ID:</label><br>
-    <input type="text" name="discord_id" required><br><br>
-
-    <label>Ім’я:</label><br>
-    <input type="text" name="name" required><br><br>
-
-    <label>Роль (студент або ментор):</label><br>
-    <input type="text" name="role" required><br><br>
-
-    <label>Зворотній зв’язок:</label><br>
-    <textarea name="feedback" rows="4" cols="50"></textarea><br><br>
-
+  <h2>Додати запис</h2>
+  <form id="dataForm">
+    <label for="id">ID:</label>
+    <input type="number" id="id" name="id" required><br><br>
+    
+    <label for="name">Ім'я:</label>
+    <input type="text" id="name" name="name" required><br><br>
+    
     <button type="submit">Надіслати</button>
   </form>
 
-  <p id="responseMessage"></p>
-
   <script>
-    document.getElementById('surveyForm').addEventListener('submit', async (e) => {
+    document.getElementById('dataForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const form = new FormData(e.target);
-      const data = Object.fromEntries(form.entries());
+      const id = document.getElementById('id').value;
+      const name = document.getElementById('name').value;
 
-      const res = await fetch("/api/form", {
+      const res = await fetch('/submit', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(data)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, name })
       });
 
-      const msg = await res.text();
-      document.getElementById('responseMessage').innerText = msg;
-      e.target.reset();
+      const data = await res.json();
+      if (data.success) {
+        alert('Успішно надіслано!');
+      } else {
+        alert('Помилка: ' + data.error);
+      }
     });
   </script>
 </body>
