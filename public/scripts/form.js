@@ -5,9 +5,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const newNameBlock = document.getElementById('newNameBlock');
   const nameInput = document.getElementById('name');
   const submitBtn = form.querySelector('button[type="submit"]');
+  const studentFields = document.getElementById('studentFields');
+  const roleSelect = document.getElementById('role');
+  const emailInput = document.getElementById('email');
 
-  // Автофокус на перше поле
-  nameInput.focus();
+  // Фокус на початкове поле
+  roleSelect.focus();
 
   // Завантажити менторів
   try {
@@ -23,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('Не вдалося завантажити менторів:', err);
   }
 
-  // Завантажити існуючих студентів
+  // Завантажити імена студентів
   try {
     const res = await fetch('/form');
     const students = await res.json();
@@ -38,6 +41,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('Не вдалося завантажити студентів:', err);
   }
 
+  // Переключення між ролями
+  roleSelect.addEventListener('change', () => {
+    const role = roleSelect.value;
+
+    if (role === 'student') {
+      studentFields.style.display = 'block';
+      emailInput.required = true;
+      nameInput.required = true;
+    } else {
+      studentFields.style.display = 'none';
+      emailInput.required = true;
+      nameInput.required = false;
+    }
+  });
+
+  // Перемикання між новим іменем і існуючим
   existingName.addEventListener('change', () => {
     if (existingName.value) {
       newNameBlock.style.display = 'none';
@@ -54,28 +73,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     el.addEventListener('input', () => el.classList.remove('invalid'));
   });
 
-  const validateForm = (data) => {
+  const validateForm = (data, role) => {
     const errors = [];
 
-    if (!data.name) {
-      errors.push({ field: 'name', message: "Ім’я обов’язкове" });
+    if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      errors.push({ field: 'email', message: "Невірний email" });
     }
 
-    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      errors.push({ field: 'email', message: "Невірний формат email" });
-    }
-
-    if (data.phone && !/^\+?\d{9,15}$/.test(data.phone)) {
-      errors.push({ field: 'phone', message: "Телефон має містити 9–15 цифр" });
-    }
-
-    if (data.birth_date && new Date(data.birth_date) > new Date()) {
-      errors.push({ field: 'birth_date', message: "Дата народження не може бути в майбутньому" });
-    }
-
-    if (data.start_date && data.offer_date &&
-        new Date(data.offer_date) < new Date(data.start_date)) {
-      errors.push({ field: 'offer_date', message: "Офер не може бути раніше початку навчання" });
+    if (role === 'student') {
+      if (!data.name) {
+        errors.push({ field: 'name', message: "Ім’я обов’язкове" });
+      }
+      if (data.phone && !/^\+?\d{9,15}$/.test(data.phone)) {
+        errors.push({ field: 'phone', message: "Телефон має містити 9–15 цифр" });
+      }
+      if (data.birth_date && new Date(data.birth_date) > new Date()) {
+        errors.push({ field: 'birth_date', message: "Дата народження не може бути в майбутньому" });
+      }
+      if (data.start_date && data.offer_date &&
+          new Date(data.offer_date) < new Date(data.start_date)) {
+        errors.push({ field: 'offer_date', message: "Офер не може бути раніше початку навчання" });
+      }
     }
 
     return errors;
@@ -84,21 +102,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const data = {
+    const role = roleSelect.value;
+
+    const baseData = {
+      role,
+      email: emailInput.value.trim() || null
+    };
+
+    const studentData = role === 'student' ? {
       name: existingName.value || nameInput.value.trim(),
       birth_date: document.getElementById('birth_date')?.value || null,
       phone: document.getElementById('phone')?.value || null,
-      email: document.getElementById('email')?.value || null,
       start_date: document.getElementById('start_date')?.value || null,
       offer_date: document.getElementById('offer_date')?.value || null,
       mentor: mentorSelect.value,
       status: document.getElementById('status')?.value || null
-    };
+    } : {};
 
-    // Очистити попередні помилки
+    const data = { ...baseData, ...studentData };
+
     form.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
 
-    const errors = validateForm(data);
+    const errors = validateForm(data, role);
     if (errors.length > 0) {
       errors.forEach(({ field }) => {
         const el = document.getElementById(field);
@@ -109,7 +134,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    // UI-зміни кнопки
     submitBtn.disabled = true;
     submitBtn.textContent = "Збереження...";
 
@@ -126,7 +150,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert('Успішно збережено!');
         form.reset();
         newNameBlock.style.display = 'block';
-        nameInput.focus();
+        studentFields.style.display = 'none';
+        roleSelect.focus();
       } else {
         alert(`Помилка: ${result.error}`);
       }
@@ -141,6 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 });
 
+// Показ календаря при кліку
 document.querySelectorAll('input[type="date"]').forEach(input => {
   input.addEventListener('click', () => input.showPicker?.());
 });
