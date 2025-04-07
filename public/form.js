@@ -1,8 +1,13 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  const form = document.getElementById('studentForm');
   const mentorSelect = document.getElementById('mentor');
   const existingName = document.getElementById('existingName');
   const newNameBlock = document.getElementById('newNameBlock');
   const nameInput = document.getElementById('name');
+  const submitBtn = form.querySelector('button[type="submit"]');
+
+  // Автофокус на перше поле
+  nameInput.focus();
 
   // Завантажити менторів
   try {
@@ -18,12 +23,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('Не вдалося завантажити менторів:', err);
   }
 
-  // Завантажити вже існуючі імена студентів
+  // Завантажити існуючих студентів
   try {
     const res = await fetch('/form');
     const students = await res.json();
     const uniqueNames = [...new Set(students.map(s => s.name))];
-
     uniqueNames.forEach(name => {
       const option = document.createElement('option');
       option.value = name;
@@ -41,23 +45,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
       newNameBlock.style.display = 'block';
       nameInput.setAttribute('required', true);
+      nameInput.focus();
     }
   });
 
-  // Основна валідація
+  // Валідація в реальному часі
+  form.querySelectorAll('input, select').forEach(el => {
+    el.addEventListener('input', () => el.classList.remove('invalid'));
+  });
+
   const validateForm = (data) => {
     const errors = [];
 
-    if (!data.name) errors.push("Поле ім’я обов’язкове");
-    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.push("Невірний email");
-    if (data.phone && !/^\+?\d{9,15}$/.test(data.phone)) errors.push("Невірний телефон");
-    if (data.birth_date && new Date(data.birth_date) > new Date()) errors.push("Дата народження не може бути в майбутньому");
-    if (data.start_date && data.offer_date && new Date(data.offer_date) < new Date(data.start_date)) errors.push("Дата оферу не може бути раніше початку");
+    if (!data.name) {
+      errors.push({ field: 'name', message: "Ім’я обов’язкове" });
+    }
+
+    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      errors.push({ field: 'email', message: "Невірний формат email" });
+    }
+
+    if (data.phone && !/^\+?\d{9,15}$/.test(data.phone)) {
+      errors.push({ field: 'phone', message: "Телефон має містити 9–15 цифр" });
+    }
+
+    if (data.birth_date && new Date(data.birth_date) > new Date()) {
+      errors.push({ field: 'birth_date', message: "Дата народження не може бути в майбутньому" });
+    }
+
+    if (data.start_date && data.offer_date &&
+        new Date(data.offer_date) < new Date(data.start_date)) {
+      errors.push({ field: 'offer_date', message: "Офер не може бути раніше початку навчання" });
+    }
 
     return errors;
   };
 
-  document.getElementById('studentForm').addEventListener('submit', async (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const data = {
@@ -71,11 +95,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       status: document.getElementById('status')?.value || null
     };
 
+    // Очистити попередні помилки
+    form.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+
     const errors = validateForm(data);
     if (errors.length > 0) {
-      alert("Помилки:\n" + errors.join('\n'));
+      errors.forEach(({ field }) => {
+        const el = document.getElementById(field);
+        if (el) el.classList.add('invalid');
+      });
+
+      alert("Будь ласка, виправ помилки у формі");
       return;
     }
+
+    // UI-зміни кнопки
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Збереження...";
 
     try {
       const res = await fetch('/submit', {
@@ -85,16 +121,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       const result = await res.json();
+
       if (result.success) {
         alert('Успішно збережено!');
-        document.getElementById('studentForm').reset();
+        form.reset();
         newNameBlock.style.display = 'block';
+        nameInput.focus();
       } else {
         alert(`Помилка: ${result.error}`);
       }
+
     } catch (err) {
       console.error('Помилка надсилання:', err);
       alert('Не вдалося надіслати форму');
     }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Надіслати";
   });
 });
