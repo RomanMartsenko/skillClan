@@ -3,41 +3,22 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Форма студента</title>
+  <title>Форма реєстрації</title>
   <link rel="stylesheet" href="styles.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 </head>
 
 <body>
   <form id="studentForm">
-    <h2>Форма реєстрації студента</h2>
+    <h2>Форма реєстрації</h2>
 
     <div class="input-group">
-      <label for="existingName">Ім’я студента:</label>
-      <select id="existingName" name="existingName">
-        <option value="">-- новий студент --</option>
-        <!-- додається динамічно -->
+      <label for="role">Я —</label>
+      <select id="role" name="role" required>
+        <option value="">-- Оберіть роль --</option>
+        <option value="student">Студент</option>
+        <option value="mentor">Ментор</option>
       </select>
-    </div>
-
-    <div id="newNameBlock" class="input-group">
-      <label for="name">Введіть нове ім’я:</label>
-      <input type="text" id="name" name="name" required />
-    </div>
-
-    <div class="input-group">
-      <label for="mentor">Ментор:</label>
-      <select id="mentor" name="mentor" required></select>
-    </div>
-
-    <div class="input-group">
-      <label for="birth_date">Дата народження:</label>
-      <input type="date" id="birth_date" name="birth_date" required />
-    </div>
-
-    <div class="input-group">
-      <label for="phone">Телефон:</label>
-      <input type="tel" id="phone" name="phone" required />
     </div>
 
     <div class="input-group">
@@ -45,23 +26,54 @@
       <input type="email" id="email" name="email" required />
     </div>
 
-    <div class="input-group">
-      <label for="start_date">Дата початку навчання:</label>
-      <input type="date" id="start_date" name="start_date" required />
-    </div>
+    <!-- Студентські поля -->
+    <div id="studentFields">
+      <div class="input-group">
+        <label for="existingName">Ім’я студента:</label>
+        <select id="existingName" name="existingName">
+          <option value="">-- новий студент --</option>
+          <!-- додається динамічно -->
+        </select>
+      </div>
 
-    <div class="input-group">
-      <label for="offer_date">Дата оферу:</label>
-      <input type="date" id="offer_date" name="offer_date" required />
-    </div>
+      <div id="newNameBlock" class="input-group">
+        <label for="name">Введіть нове ім’я:</label>
+        <input type="text" id="name" name="name" required />
+      </div>
 
-    <div class="input-group">
-      <label for="status">Статус:</label>
-      <select id="status" name="status" required>
-        <option value="навчання">Навчання</option>
-        <option value="співбесіди">Співбесіди</option>
-        <option value="офер">Офер</option>
-      </select>
+      <div class="input-group">
+        <label for="mentor">Ментор:</label>
+        <select id="mentor" name="mentor" required></select>
+      </div>
+
+      <div class="input-group">
+        <label for="birth_date">Дата народження:</label>
+        <input type="date" id="birth_date" name="birth_date" required />
+      </div>
+
+      <div class="input-group">
+        <label for="phone">Телефон:</label>
+        <input type="tel" id="phone" name="phone" required />
+      </div>
+
+      <div class="input-group">
+        <label for="start_date">Дата початку навчання:</label>
+        <input type="date" id="start_date" name="start_date" required />
+      </div>
+
+      <div class="input-group">
+        <label for="offer_date">Дата оферу:</label>
+        <input type="date" id="offer_date" name="offer_date" required />
+      </div>
+
+      <div class="input-group">
+        <label for="status">Статус:</label>
+        <select id="status" name="status" required>
+          <option value="навчання">Навчання</option>
+          <option value="співбесіди">Співбесіди</option>
+          <option value="офер">Офер</option>
+        </select>
+      </div>
     </div>
 
     <button type="submit">Надіслати</button>
